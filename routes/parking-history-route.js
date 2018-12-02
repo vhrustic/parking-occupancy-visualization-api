@@ -1,6 +1,17 @@
+const path = require('path');
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database(path.resolve(__dirname, 'mvdb.db'));
+
+
 const constants = require('./constants');
 
 let history = [];
+const FIRST_COLUMN = [];
+const SECOND_COLUMN = [];
+const THIRD_COLUMN = [];
+const FOURTH_COLUMN = [];
+
+loadCarPositions();
 
 function parkingHistoryRoute(req, res) {
     // Website you wish to allow to connect
@@ -15,13 +26,36 @@ function parkingHistoryRoute(req, res) {
     // Set to true if you need the website to include cookies in the requests sent
     // to the API (e.g. in case you use sessions)
     res.setHeader('Access-Control-Allow-Credentials', true);
-    history=[];
+    history = [];
     generateAnimationHistory();
     return res.json({data: history});
 }
 
+function loadCarPositions() {
+    const query = 'select * from car_position ORDER BY column_id';
+    db.all(query, [], (err, row) => {
+        row.forEach(rowItem => {
+            switch (rowItem.column_id) {
+                case 0:
+                    FIRST_COLUMN.push([rowItem.lat_position, rowItem.long_position]);
+                    break;
+                case 1:
+                    SECOND_COLUMN.push([rowItem.lat_position, rowItem.long_position]);
+                    break;
+                case 2:
+                    THIRD_COLUMN.push([rowItem.lat_position, rowItem.long_position]);
+                    break;
+                default:
+                    FOURTH_COLUMN.push([rowItem.lat_position, rowItem.long_position]);
+            }
+        });
+
+        db.close();
+    })
+}
+
 generateAnimationHistory = () => {
-    const initialState = [constants.FIRST_COLUMN, constants.SECOND_COLUMN, constants.THIRD_COLUMN, constants.FOURTH_COLUMN];
+    const initialState = [FIRST_COLUMN, SECOND_COLUMN, THIRD_COLUMN, FOURTH_COLUMN];
 
     randomizeCarVisibility(initialState);
     saveStateInHistory(initialState);
