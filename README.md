@@ -1,4 +1,4 @@
-# Parking Occupancy Vsiualization API
+# Parking Occupancy Visualization API
 
 Parking occupancy visualization's simple API written using NodeJs/ExpressJs. Project also uses SQLite database.
 ### How to run
